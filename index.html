@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Just For You jifiii ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+ margin:0;height:100vh;overflow:hidden;
+ background:linear-gradient(to bottom,#0f2027,#203a43,#2c5364);
+ color:white;font-family:'Segoe UI',sans-serif;
+ text-align:center;
+}
+.scene{display:none;padding:30px;}
+.active{display:block;}
+button{
+ padding:12px 26px;border:none;border-radius:25px;
+ font-size:16px;background:#ff5e8e;color:white;
+ cursor:pointer;margin-top:25px;
+}
+.fade{animation:fade 1.5s;}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+.highlight{
+ font-size:1.4em;
+ font-weight:bold;
+ color:#ffd6e8;
+ text-shadow:0 0 12px rgba(255,150,200,0.9);
+ margin:15px 0;
+}
+
+/* Snow */
+.snow{position:absolute;top:-10px;animation:fall linear infinite;z-index:1;pointer-events:none;}
+@keyframes fall{to{transform:translateY(110vh)}}
+
+/* Gift */
+.gifts span{font-size:70px;margin:15px;cursor:pointer}
+
+/* Heart Game */
+#heartArea{position:relative;height:55vh;overflow:hidden;}
+.heart{
+ position:absolute;cursor:pointer;
+ animation:floatUp linear forwards;z-index:10;
+}
+@keyframes floatUp{from{bottom:-40px;}to{bottom:100%;}}
+#timer{
+ font-size:3.2em;font-weight:bold;color:#ff4d6d;
+ text-shadow:0 0 15px rgba(255,77,109,0.9);
+}
+.result{
+ font-size:1.3em;margin-top:15px;
+ font-weight:bold;color:#ffd6e8;
+ text-shadow:0 0 12px rgba(255,150,200,0.9);
+}
+
+/* Cards */
+.card{
+ display:inline-block;
+ padding:15px 20px;
+ margin:10px;
+ border:1px solid #fff;
+ border-radius:15px;
+ background:rgba(255,255,255,0.1);
+ cursor:pointer;
+ perspective:600px;
+ transform-style:preserve-3d;
+ transition: transform 0.5s, background 0.5s;
+}
+.card span{
+ display:block;
+ backface-visibility:hidden;
+}
+.card .back{
+ transform:rotateY(180deg);
+}
+.card.flipped{
+ transform:rotateY(180deg);
+ background:#ff5e8e;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 1. INTRO -->
+<div class="scene active fade" id="s1">
+<h1>Hey jilebiii❤️</h1>
+<p>I made something… just for you.</p>
+<button onclick="go(2)">Continue</button>
+</div>
+
+<!-- 2. TEASE -->
+<div class="scene fade" id="s2">
+<h2>Before you proceed 😌</h2>
+<p>Smile first.</p>
+<button onclick="go(3)">Okay</button>
+</div>
+
+<!-- 3. GIFT -->
+<div class="scene fade" id="s3">
+<h2>Choose a gift 🎁</h2>
+<div class="gifts">
+<span onclick="wrong()">🎁</span>
+<span onclick="right()">🎁</span>
+<span onclick="wrong()">🎁</span>
+</div>
+<p id="giftMsg"></p>
+</div>
+
+<!-- 4. HEART GAME -->
+<div class="scene fade" id="s4">
+<h2>Catch My Love 💓</h2>
+<div id="timer">15</div>
+<p>Score: <span id="score">0</span></p>
+<div id="heartArea"></div>
+<p class="result" id="heartResult"></p>
+</div>
+
+<!-- 4.5 CRAZY BUTTON GAME -->
+<div class="scene fade" id="s4_5">
+<h2>Catch the Silly Button 😆</h2>
+<p>Try to click "LOL!"… if you can 😜</p>
+<div id="crazyArea" style="position:relative;height:40vh;"></div>
+<p id="crazyMsg" style="margin-top:15px;font-weight:bold;color:#ffd6e8;"></p>
+</div>
+
+<!-- 5. QUIZ -->
+<div class="scene fade" id="s5">
+<h2>Quick Question 😏</h2>
+<p>Who gets angry first?</p>
+<button onclick="quiz('Haha 😜 yes you… but it’s cute')">You</button>
+<button onclick="quiz('Nice try 😆 but nope')">Me</button>
+<p id="quizMsg"></p>
+</div>
+
+<!-- 6. COMPLIMENTS -->
+<div class="scene fade" id="s6">
+<h2>Tap the compliments 💬</h2>
+<div class="card" onclick="flip(this,'Beautiful ❤️')">
+  <span class="front">Tap</span>
+  <span class="back"></span>
+</div>
+<div class="card" onclick="flip(this,'My safe place 🫶')">
+  <span class="front">Tap</span>
+  <span class="back"></span>
+</div>
+<div class="card" onclick="flip(this,'My forever ✨')">
+  <span class="front">Tap</span>
+  <span class="back"></span>
+</div>
+<button onclick="go(7)">Next</button>
+</div>
+
+<!-- 7. SECRET MESSAGE -->
+<div class="scene fade" id="s7">
+<p class="highlight">You calm my chaos.</p>
+<p class="highlight">You make ordinary days special.</p>
+<p class="highlight">You are my favorite feeling.</p>
+<p>No matter what happens,<br><strong>I choose you ❤️</strong></p>
+<button onclick="go(8)">Finish</button>
+</div>
+
+<!-- 8. END -->
+<div class="scene fade" id="s8">
+<h2>Whenever you miss me…</h2>
+<p>Scan this again 💕</p>
+</div>
+
+<script>
+// DOM references
+const scoreSpan = document.getElementById('score');
+const timer = document.getElementById('timer');
+const heartArea = document.getElementById('heartArea');
+const heartResult = document.getElementById('heartResult');
+const giftMsg = document.getElementById('giftMsg');
+const quizMsg = document.getElementById('quizMsg');
+
+function go(n){
+ document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+ document.getElementById('s'+n).classList.add('active');
+ if(n===4) startHeartGame();
+ if(n==='4_5') startCrazyGame();
+}
+
+/* Snow */
+for(let i=0;i<35;i++){
+ let s=document.createElement("div");
+ s.className="snow"; s.innerHTML="❄";
+ s.style.left=Math.random()*100+"vw";
+ s.style.animationDuration=(Math.random()*6+6)+"s";
+ document.body.appendChild(s);
+}
+
+/* Gift */
+function wrong(){giftMsg.innerText="Haha 😜 try again";}
+function right(){giftMsg.innerText="Perfect ❤️";setTimeout(()=>go(4),1200);}
+
+/* Heart Game */
+let timerI, spawnTimeout, time=15, score=0;
+
+function startHeartGame(){
+  clearInterval(timerI);
+  clearTimeout(spawnTimeout);
+  time=15; score=0;
+  timer.innerText=time; scoreSpan.innerText=score;
+  heartArea.innerHTML=""; heartResult.innerText="";
+
+  timerI = setInterval(()=>{
+    time--; timer.innerText = time;
+    if(time <= 0) endHeartGame();
+  },1000);
+
+  spawnNextHeart();
+}
+
+function spawnNextHeart(){
+  let h = document.createElement("div");
+  h.className="heart"; 
+  h.innerHTML="❤️";
+
+  let size = Math.random()*20 + 20;
+  h.style.fontSize = size + "px";
+  
+  let r = 200 + Math.floor(Math.random()*55);
+  let g = Math.floor(Math.random()*50);
+  let b = Math.floor(Math.random()*50);
+  h.style.color = `rgb(${r},${g},${b})`;
+
+  h.style.left = Math.random()*85+"%";
+  h.style.animationDuration = (Math.random()*3+6)+"s";
+  
+  h.addEventListener("pointerdown", ()=>{
+    score++; scoreSpan.innerText=score; 
+    h.remove();
+  });
+
+  heartArea.appendChild(h);
+  setTimeout(()=>h.remove(),7000);
+  spawnTimeout = setTimeout(spawnNextHeart, Math.random()*1000 + 800);
+}
+
+function endHeartGame(){
+  clearInterval(timerI); 
+  clearTimeout(spawnTimeout);
+  heartResult.innerText = score<6
+    ? "Slow hands 😜 but still adorable"
+    : score<12
+    ? "Nice 😍 getting better!"
+    : "OMG 😳 lightning fast!";
+  setTimeout(()=>go('4_5'),1000);
+}
+
+/* CRAZY BUTTON GAME (Impossible LOL) */
+function startCrazyGame(){
+  const area = document.getElementById('crazyArea');
+  area.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.innerText = 'LOL!';
+  btn.style.position = 'absolute';
+  btn.style.padding = '18px 28px';
+  btn.style.fontSize = '18px';
+  btn.style.background = '#ff5e8e';
+  btn.style.color = 'white';
+  btn.style.border = 'none';
+  btn.style.borderRadius = '20px';
+  btn.style.cursor = 'pointer';
+  
+  area.appendChild(btn);
+
+  function moveButton(){
+    let x = Math.random() * (area.offsetWidth - btn.offsetWidth);
+    let y = Math.random() * (area.offsetHeight - btn.offsetHeight);
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
+    setTimeout(moveButton, 400);
+  }
+  moveButton();
+
+  btn.addEventListener('click', ()=>{
+    document.getElementById('crazyMsg').innerText = '😂 So close, but no!';
+  });
+
+  // Automatically move to quiz after 5 seconds to avoid infinite frustration
+  setTimeout(()=>go(5),20000);
+}
+
+/* Quiz */
+function quiz(msg){
+ quizMsg.innerText=msg;
+ setTimeout(()=>go(6),2000);
+}
+
+/* Compliments */
+function flip(el,text){
+ el.classList.add('flipped');
+ el.querySelector('.back').innerText = text;
+}
+</script>
+
+</body>
+</html>
